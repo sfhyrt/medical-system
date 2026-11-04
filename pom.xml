@@ -11,8 +11,8 @@
 	<groupId>com.example</groupId>
 	<artifactId>medical-system</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>medical-system</name>
+	<description>Java Web lab 1 medical system initialization</description>
 	<url/>
 	<licenses>
 		<license/>
