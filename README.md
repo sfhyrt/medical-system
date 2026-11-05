@@ -2,6 +2,10 @@
 
 Java Web 开发实验一：开发环境搭建与医疗系统 Hello World。
 
+Java Web homework — medical system lab 1.
+
+GitHub 仓库：https://github.com/sfhyrt/medical-system
+
 ## 环境
 
 本机验证组合：JDK 21.0.6、Maven 3.10.0、MySQL 8.0.44、Git 2.55.0.windows.5、VS Code 1.144.1、Spring Boot 4.1.2。Java 运行器、编译器和 Maven 使用同一套 JDK 21。
