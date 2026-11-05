@@ -6,15 +6,14 @@
 
 ## 远程仓库
 
-在 GitHub 创建一个空仓库后，在本项目根目录执行，替换下列占位地址：
+本实验 GitHub 仓库：https://github.com/sfhyrt/medical-system 。本地已关联该仓库，后续提交可在项目根目录执行：
 
 ```powershell
-git remote add origin https://github.com/YOUR_ACCOUNT/medical-system.git
 git push -u origin main
 git push -u origin develop
 ```
 
-使用本人账号完成 GitHub 登录。以远程页面可见源码、main/develop 两个分支为核验标准，并将真实地址填入实验报告。未推送前，本地仓库路径不能代替 GitHub 仓库地址。
+以远程页面可见源码、main/develop 两个分支为核验标准，报告使用上述真实仓库地址。Git bundle 保留完整历史，可在需要时恢复本地仓库。
 
 ## 复现
 
