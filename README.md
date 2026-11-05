@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 医疗系统实验一
 
 Java Web 开发实验一：开发环境搭建与医疗系统 Hello World。
@@ -64,3 +65,7 @@ java -jar target/medical-system-0.0.1-SNAPSHOT.jar
 ## 环境排错
 
 实际遇到的问题和处理记录见 `docs/environment.md`。本项目使用 VS Code 完成实验，报告中如实记录开发工具。
+=======
+# medical-system
+java web homework
+>>>>>>> f62e0397b2ac6f19175305474fcdda19c65b74f9
