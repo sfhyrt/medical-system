@@ -1,40 +1,53 @@
-# 实验一环境核验与排错记录
+# 开发环境与故障排查
 
-首次核验：2026-11-04；按课堂新要求补充：2026-11-11。系统为 Windows 10 64 位，内存约 32 GB。
+## 环境要求
 
-## 已验证的环境
+| 组件 | 当前使用版本 | 检查命令 |
+| --- | --- | --- |
+| JDK | 21.0.6 | java -version、javac -version |
+| Maven | 3.10.0 | mvn -v |
+| Node.js / npm | 26.13.0 / 11.20.0 | node -v、npm.cmd -v |
+| MySQL | 8.0.44 | 连接数据库后查询版本 |
+| Spring Boot | 4.1.2 | pom.xml |
+| MyBatis Starter | 4.0.1 | pom.xml |
+| Vue / Vite | 3.5.45 / 8.3.8 | frontend/package.json |
 
-| 项目 | 本机版本或位置 | 核验方法 |
-|---|---|---|
-| JDK | 21.0.6；`D:\develob\java` | `java -version`、`javac -version`、Maven 启动日志 |
-| Maven | 3.10.0；`D:\develob\apache-maven-3.10.0-bin\apache-maven-3.10.0` | `mvn -v`、实际依赖解析与构建 |
-| MySQL | 8.0.44；MySQL80 服务；3306 | 本机登录、版本查询和数据库列表截图 |
-| Git | 2.55.0.windows.5 | `git --version`、分支与提交历史 |
-| VS Code | 1.144.1 | 安装清单及 Java、Spring 扩展清单 |
-| Spring Boot | 4.1.2 | Maven 配置及服务启动日志 |
+VS Code 可使用 Java、Spring Boot 和 Vue Official 扩展。编辑器推荐清单位于 .vscode/extensions.json。
 
-## 实际发生并解决的问题
+## 连接与端口
 
-1. **Java 版本冲突。** 初始 `java` 为 Java 8，`javac` 为 Java 17。将 `JAVA_HOME` 设为 `D:\develob\java`，把对应 bin 提到 Path 前面，重新打开终端后统一到 JDK 21。
-2. **mvn 命令找不到。** 解压包额外包含一层 `apache-maven-3.10.0-bin`，最初 Path 与实际目录不符。将 Path 指向实际 Maven bin 目录，版本检查与依赖下载通过。
-3. **找不到 spring-boot 插件前缀。** 曾在 `src/main/java/.../controller` 中运行命令。切换至含 `pom.xml` 的项目根目录后正常启动。
-4. **VS Code 无法解析 java.lang.Object。** Maven 已能编译运行，但编辑器仍报告基础类缺失。明确映射 JDK 21，保留旧缓存备份并重新导入后，Java 语言服务报告 HelloController 为 0 个问题。
-5. **MySQL 登录失败。** 首次密码输入未通过，重新输入正确密码后成功登录并查询出 8.0.44、3306 和数据库列表。未修改现有数据库和账号。
+- 后端默认监听8080，Vite开发服务监听5173。
+- Vite 将 /api 代理到 http://127.0.0.1:8080。
+- MySQL 默认使用127.0.0.1:3306。
+- MyBatis 只读查询数据库版本、服务器时间及常量1，不修改业务数据。
+- 数据库凭据保存在项目根目录的 application-local.properties，或通过环境变量提供。
 
-## 未发生故障时的定位方法
+## Java 版本不一致
 
-- Maven 仓库或镜像失效：先查看失败仓库 URL、HTTP 状态、代理和 TLS 报错，再检查用户级 `settings.xml`。本次 Maven Central 实际可用，使用默认仓库完成依赖下载，未人为切换镜像。
-- MySQL 端口冲突：查看 `Get-NetTCPConnection -LocalPort 3306 -State Listen` 的进程归属，再检查 MySQL 配置和客户端端口。本机 3306 由 MySQL 自身正常监听，未发生端口冲突。
-- 编码乱码：Java 源文件、Maven 工程与 HTTP 响应使用 UTF-8。Windows 终端显示编码问题与源文件编码分别排查；报告如实采用 VS Code，未声称在 IDEA 中复现故障。
+同时检查 java、javac、Maven 输出和编辑器项目运行时。JAVA_HOME 应指向JDK根目录，Path应包含对应bin目录。更改环境变量后新开终端。
 
-## 按新要求补充的环境
+若Maven能编译而编辑器无法解析java.lang.Object，先明确映射项目JDK，再重新导入项目或重建Java语言服务缓存。
 
-项目保留 Java 21、Spring Boot 4.1.2，引入 MyBatis Starter 4.0.1 和 MySQL Connector/J。MyBatis 官方兼容表说明 4.0 系列支持 Spring Boot 4.0+。本机只读 SQL 查询数据库版本、当前时间和常量 1，验证真实 Mapper 调用，不修改已有业务数据。
+## Maven 启动或依赖下载失败
 
-Node.js 26.13.0 LTS 安装在 D:\develob\node-v26.13.0-win-x64，npm 11.20.0；压缩包经 Node.js 官方 SHASUMS256.txt 验证。用户 Path 已补充该目录。已经打开的终端可能保留旧环境，可新开 VS Code 终端；项目本机终端配置也包含 Node.js 路径。
+在包含pom.xml的根目录执行命令。检查实际Maven bin目录，留意压缩包解压后的嵌套路径。
 
-Vue 3.5.45、Vite 8.3.8、Vue 插件 6.0.10 的版本固定在 frontend/package.json，并提交 package-lock.json。开发页面监听 5173，/api 代理至后端 8080。生产构建复制至 Jar 内 static，交付后可只启动 Java 服务。
+下载失败时查看仓库地址、HTTP状态和TLS错误，再检查网络、代理与settings.xml。可先重新执行原命令，无需立即更换所有依赖版本。
 
-VS Code 增加 Vue Official 扩展。Node.js 下载发生中断后使用断点续传，再校验完整文件的 SHA256；没有跳过完整性验证。
+## Node.js 与前端构建
 
-数据库凭据保存在根目录的 application-local.properties，Git 忽略该文件，Jar 和源码包不包含它。后端查询失败返回 503，前端显示错误提示；重新检测会清除上次状态。
+确认node和npm来自同一安装目录。已经打开的终端可能保留旧Path，更新配置后新开终端。
+
+使用npm.cmd ci安装锁定依赖。分发完整JAR之前先构建Vue页面；scripts/build-demo.ps1会检查打包内容。
+
+## 数据库连接失败
+
+确认MySQL服务、端口与本机凭据正确，检查当前工作目录能否读取application-local.properties。页面显示503时，不应按正常连接处理。
+
+公开错误响应不包含驱动内部连接信息。修复连接后点击重新检测，确认数据库版本和时间来自新的实际查询。
+
+## 端口与编码
+
+通过监听进程确认端口归属，或使用--server.port指定其他后端端口。后端端口改变时同步修改Vite代理地址。
+
+源文件和HTTP响应使用UTF-8。终端显示乱码与文件编码需要分别排查，避免仅修改源文件编码而未检查终端设置。

@@ -12,7 +12,7 @@
 	<artifactId>medical-system</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>medical-system</name>
-	<description>Java Web lab 1 medical system initialization</description>
+	<description>Medical system foundation with Vue, Spring Boot, MyBatis and MySQL</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -64,7 +64,7 @@
 				<artifactId>maven-resources-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>include-vue-demo</id>
+						<id>include-vue-assets</id>
 						<phase>process-resources</phase>
 						<goals><goal>copy-resources</goal></goals>
 						<configuration>

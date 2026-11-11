@@ -53,12 +53,12 @@ onMounted(inspect)
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z" /></svg></span>
         <span>医疗系统<span class="brand-caption">MEDICAL SYSTEM</span></span>
       </a>
-      <div class="topbar-right"><span class="course">Java Web 开发</span><span class="lab-badge">实验 01</span></div>
+      <div class="topbar-right"><span class="project-caption">服务工作台</span><span class="view-badge">系统概览</span></div>
     </header>
 
     <main>
       <section class="intro">
-        <div><p class="eyebrow">开发环境验证</p><h1>{{ connected ? '从页面到数据库，连接已就绪。' : '检查开发环境的每一段连接。' }}</h1><p class="intro-copy">通过一次真实请求，验证前端页面、后端接口与数据库访问。</p></div>
+        <div><p class="eyebrow">系统状态</p><h1>{{ connected ? '服务已连通，运行状态正常。' : '检查服务与数据库的连接状态。' }}</h1><p class="intro-copy">查看接口响应、运行环境与数据库连接，及时掌握服务状态。</p></div>
         <button class="refresh" type="button" :disabled="loading" @click="inspect"><svg :class="{ spinning: loading }" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.5-1L20 9M4 15l2.4 3A7 7 0 0 0 18 17" /></svg>{{ loading ? '检测中…' : '重新检测' }}</button>
       </section>
 
@@ -95,7 +95,7 @@ onMounted(inspect)
           <section class="panel runtime-panel"><p class="section-kicker">RUNTIME</p><h2>运行环境</h2><dl><div><dt>Java</dt><dd>{{ report?.javaVersion || '—' }}</dd></div><div><dt>Spring Boot</dt><dd>{{ report?.springBootVersion || '—' }}</dd></div><div><dt>MyBatis</dt><dd>{{ report?.mybatisVersion || '—' }}</dd></div><div><dt>开发工具</dt><dd>VS Code</dd></div></dl></section>
         </aside>
       </div>
-      <footer><span>医疗系统初始化 · Java Web 实验一</span><span>Vue / Spring Boot / MyBatis / MySQL</span></footer>
+      <footer><span>Medical System · 服务状态</span><span>Vue / Spring Boot / MyBatis / MySQL</span></footer>
     </main>
   </div>
 </template>
