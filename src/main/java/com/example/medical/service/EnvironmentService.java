@@ -37,7 +37,7 @@ public class EnvironmentService {
     }
 
     private EnvironmentReport report(String status, DatabaseSnapshot snapshot, String message) {
-        return new EnvironmentReport("医疗系统 · 实验一", helloService.hello(),
+        return new EnvironmentReport("Medical System", helloService.hello(),
                 System.getProperty("java.version"), SpringBootVersion.getVersion(),
                 SqlSessionFactory.class.getPackage().getImplementationVersion(), status,
                 snapshot == null ? null : snapshot.databaseVersion(),
