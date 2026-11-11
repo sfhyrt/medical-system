@@ -2,7 +2,7 @@
 
 ## 本地材料
 
-源码包含 Maven 配置、标准分层包、Hello World 接口、自动化测试、环境核验 SQL、运行及排错说明。实验报告和证据附件单独放在课程文件夹的“实验一”目录。
+源码包含 Vue 页面、Vite 和 Maven 配置、MyBatis Mapper、Hello World 与数据库检测接口、6 项自动化测试、构建启动脚本及说明。新报告和证据附件保存在 D:\Java web\实验一_新要求，原提交包及修改前 Git bundle 已备份。
 
 ## 远程仓库
 
@@ -17,4 +17,6 @@ git push -u origin develop
 
 ## 复现
 
-下载源码后进入含 pom.xml 的目录，安装 JDK 21，运行 `mvn clean verify` 和 `mvn spring-boot:run`。打开 `/api/hello` 检查正文，再根据环境说明核对 MySQL 服务。
+下载源码后进入含 pom.xml 的目录，准备 JDK 21、Node.js 和 MySQL，参照根目录示例创建本机数据库配置。执行 `.\scripts\build-demo.ps1` 构建，再执行 `.\scripts\start-demo.ps1`，访问 http://localhost:8080/。
+
+分别开发时，后端运行 `mvn spring-boot:run`，前端在 frontend 目录运行 `npm.cmd run dev`，访问 http://127.0.0.1:5173/。完整说明见 README。Docker 是可选项，本次没有配置。

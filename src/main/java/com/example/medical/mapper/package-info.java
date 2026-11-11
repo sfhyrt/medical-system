@@ -1,2 +1,2 @@
-/** 数据访问层预留包，后续用于 MyBatis-Plus Mapper。 */
+/** MyBatis 数据访问层；实验一以只读查询验证数据库连通性。 */
 package com.example.medical.mapper;
