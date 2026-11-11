@@ -1,6 +1,6 @@
 # 实验一环境核验与排错记录
 
-核验日期：2026-11-04。系统为 Windows 10 64 位，内存约 32 GB。
+首次核验：2026-11-04；按课堂新要求补充：2026-11-11。系统为 Windows 10 64 位，内存约 32 GB。
 
 ## 已验证的环境
 
@@ -27,6 +27,14 @@
 - MySQL 端口冲突：查看 `Get-NetTCPConnection -LocalPort 3306 -State Listen` 的进程归属，再检查 MySQL 配置和客户端端口。本机 3306 由 MySQL 自身正常监听，未发生端口冲突。
 - 编码乱码：Java 源文件、Maven 工程与 HTTP 响应使用 UTF-8。Windows 终端显示编码问题与源文件编码分别排查；报告如实采用 VS Code，未声称在 IDEA 中复现故障。
 
-## 版本与后续实验
+## 按新要求补充的环境
 
-项目固定 Java 21、Spring Boot 4.1.2。后续引入 MyBatis-Plus 时应使用适配 Spring Boot 4 的 starter。数据库设计、CRUD、安全认证和前端均属于后续实验，本次只完成初始化与连通性验证。
+项目保留 Java 21、Spring Boot 4.1.2，引入 MyBatis Starter 4.0.1 和 MySQL Connector/J。MyBatis 官方兼容表说明 4.0 系列支持 Spring Boot 4.0+。本机只读 SQL 查询数据库版本、当前时间和常量 1，验证真实 Mapper 调用，不修改已有业务数据。
+
+Node.js 26.13.0 LTS 安装在 D:\develob\node-v26.13.0-win-x64，npm 11.20.0；压缩包经 Node.js 官方 SHASUMS256.txt 验证。用户 Path 已补充该目录。已经打开的终端可能保留旧环境，可新开 VS Code 终端；项目本机终端配置也包含 Node.js 路径。
+
+Vue 3.5.45、Vite 8.3.8、Vue 插件 6.0.10 的版本固定在 frontend/package.json，并提交 package-lock.json。开发页面监听 5173，/api 代理至后端 8080。生产构建复制至 Jar 内 static，交付后可只启动 Java 服务。
+
+VS Code 增加 Vue Official 扩展。Node.js 下载发生中断后使用断点续传，再校验完整文件的 SHA256；没有跳过完整性验证。
+
+数据库凭据保存在根目录的 application-local.properties，Git 忽略该文件，Jar 和源码包不包含它。后端查询失败返回 503，前端显示错误提示；重新检测会清除上次状态。

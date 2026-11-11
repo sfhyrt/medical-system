@@ -1,0 +1,4 @@
+# Copy to application-local.properties in the project root and enter local credentials.
+# The local file is ignored by Git and stays outside the distributable Jar.
+spring.datasource.username=root
+spring.datasource.password=YOUR_LOCAL_PASSWORD

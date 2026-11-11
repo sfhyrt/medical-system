@@ -1,70 +1,98 @@
 # 医疗系统实验一
 
-Java Web 开发实验一：开发环境搭建与医疗系统 Hello World。
-
 Java Web homework — medical system lab 1.
+
+实验一环境搭建与前后端联调：Vue 页面调用 Spring Boot 接口，由 MyBatis 执行真实的 MySQL 只读查询，展示数据库版本、服务器时间和验证值。开发工具采用 VS Code。
 
 GitHub 仓库：https://github.com/sfhyrt/medical-system
 
-## 环境
+## 环境与依赖
 
-本机验证组合：JDK 21.0.6、Maven 3.10.0、MySQL 8.0.44、Git 2.55.0.windows.5、VS Code 1.144.1、Spring Boot 4.1.2。Java 运行器、编译器和 Maven 使用同一套 JDK 21。
+| 组件 | 本次使用版本 |
+| --- | --- |
+| Java / Maven | Oracle JDK 21.0.6 / Maven 3.10.0 |
+| Spring Boot / MyBatis Starter | 4.1.2 / 4.0.1 |
+| MySQL Server | 8.0.44 |
+| Node.js / npm | 26.13.0 / 11.20.0 |
+| Vue / Vite | 3.5.45 / 8.3.8 |
+| Vite Vue 插件 | 6.0.10 |
+| 开发工具 | VS Code，Java、Spring Boot 和 Vue Official 扩展 |
 
-VS Code 推荐扩展见 `.vscode/extensions.json`。本机 JDK 路径存放在忽略提交的 `.vscode/settings.json` 中，其他电脑按实际安装位置配置。
+前端依赖使用精确版本及 package-lock.json 锁定，MySQL 驱动由 Spring Boot 管理版本。MyBatis Starter 4.0 系列支持 Spring Boot 4.0+。JDK、Node.js 和数据库密码不随源码提交。
 
-## 启动与访问
+## 本机数据库配置
 
-在包含 `pom.xml` 的项目根目录打开终端：
+在含 pom.xml 的项目根目录，将 application-local.properties.example 复制为 application-local.properties，在本机编辑用户名、密码。此文件已加入 Git 忽略，保持在项目根目录，不放入 src/main/resources。
+
+也可使用环境变量 DB_URL、DB_USERNAME、DB_PASSWORD；本机配置文件中的值优先于默认占位符。默认连接 127.0.0.1:3306。
+
+验证 SQL 仅执行 SELECT VERSION(), CURRENT_TIMESTAMP, 1，不需要创建数据库或业务表，不修改已有数据。关闭 SSL 和允许公钥获取仅用于本机实验；远程部署应另行配置 TLS。
+
+## 构建并运行完整页面
+
+在项目根目录的 PowerShell 中执行：
 
 ```powershell
+node -v
+npm.cmd -v
 java -version
-javac -version
-mvn -v
-mvn spring-boot:run
+mvn.cmd -v
+.\scripts\build-demo.ps1
+.\scripts\start-demo.ps1
 ```
 
-项目也提供 Maven Wrapper：`./mvnw.cmd spring-boot:run`。首次执行需要联网下载依赖。
+构建脚本依次执行 npm ci、npm run build、mvn clean verify，并确认 Vue 的 index.html 已进入 Jar。Maven 本身只复制已有的 frontend/dist，因此交付完整页面时应使用上述脚本。若本机脚本策略限制，可执行 powershell -ExecutionPolicy Bypass -File .\scripts\build-demo.ps1，不需要修改系统策略。
 
-浏览器访问 `http://localhost:8080/api/hello`，应收到 HTTP 200 和正文 `Hello World! Medical System`。服务运行期间保持终端开启，按 Ctrl+C 停止。
+打开 http://localhost:8080/，点击“重新检测”，应看到 Vue、后端接口、MyBatis 和 MySQL 均通过，数据库版本显示本机实测值。运行期间保持终端开启。
 
-## 分层结构
+也可以在项目根目录执行 java -jar target/medical-system-0.0.1-SNAPSHOT.jar。Jar 内已含 Vue 构建产物，运行时不需要 Node.js。若使用独立 Jar，请在它的当前工作目录放置本机的 application-local.properties，或设置数据库环境变量。
+
+## 前后端分别开发
+
+后端，在项目根目录执行：
+
+```powershell
+mvn.cmd spring-boot:run
+```
+
+前端，另开终端执行：
+
+```powershell
+cd frontend
+npm.cmd ci
+npm.cmd run dev
+```
+
+访问 http://127.0.0.1:5173/。Vite 将 /api 转发到 http://127.0.0.1:8080，页面使用相对接口路径，避免开发时跨域。5173 已被占用时会明确报错。
+
+## 接口和验证
+
+| 请求 | 行为 |
+| --- | --- |
+| GET /api/hello | HTTP 200，Hello World! Medical System |
+| GET /api/environment | MyBatis 查询成功返回 HTTP 200 和实际数据库信息；连接或验证失败返回 HTTP 503 |
+| GET /api/not-found | HTTP 404 |
+| POST /api/hello | HTTP 405 |
+
+mvn clean verify 中的 6 项自动化测试覆盖原有接口、查询值传递、数据库失败和异常结果，测试使用 Mapper 替身，不要求测试机保存数据库密码。真实 MySQL 连接、Vue 开发代理及打包页面另以浏览器联调验证；两类证据分别记录。
+
+## 主要目录
 
 ```text
+frontend/                     Vue 单文件组件、Vite 配置与依赖锁
 src/main/java/com/example/medical/
-  MedicalSystemApplication.java    启动入口与组件扫描根包
-  controller/HelloController.java  接收 GET /api/hello
-  service/HelloService.java        示例服务，通过构造方法注入 Controller
-  entity/                         医疗业务实体预留包
-  mapper/                         数据访问层预留包
-  dto/                            接口数据对象预留包
-  config/                         配置预留包
-  exception/                      异常处理预留包
-src/main/resources/application.properties
-src/test/java/com/example/medical/MedicalSystemApplicationTests.java
-sql/environment-check.sql
+  controller/                 Hello 与环境检测接口
+  service/                    服务逻辑、数据库失败处理
+  mapper/DatabaseProbeMapper  MyBatis 只读查询
+  dto/                        查询结果和接口响应
+src/main/resources/application.properties  公开配置及环境变量占位符
+application-local.properties.example       本机凭据配置示例
+scripts/                      构建、启动和 HTTP 验证脚本
+docs/                         环境与提交说明
 ```
 
-`Controller → Service` 调用链已实现。预留包通过 `package-info.java` 说明职责；业务表、持久化代码和 CRUD 在实验二实现。Hello World 不依赖数据库连接，MySQL 安装与登录单独核验。
+## 提交与可选项
 
-## 测试和打包
+develop 保存开发提交，验证完成后合并至 main，两分支同步到 GitHub。提交包包含报告、源码、可执行 Jar、Git bundle 和配置及运行截图。Docker 按新要求作为可选项，本次未加入。
 
-```powershell
-mvn clean verify
-java -jar target/medical-system-0.0.1-SNAPSHOT.jar
-```
-
-自动化测试启动随机端口的真实 Web 服务，核验 GET 正常返回 200、未知路径返回 404、错误请求方法返回 405。生成的可执行 Jar 位于 `target/`，构建产物不提交到 Git。
-
-在服务启动后，可用 `./scripts/verify-http.ps1` 再次核验本机接口。
-
-## Git 分支和提交规范
-
-- `main`：通过测试、可供验收的版本。
-- `develop`：开发分支，完成后经验证合并到 `main`。
-- 提交使用 `chore:`（初始化）、`feat:`（功能）、`test:`（测试）、`docs:`（文档）前缀，描述实际变更。
-
-远程仓库设置方法见 `docs/submission.md`。数据库密码、令牌、机器专用 JDK 路径及构建目录不提交。
-
-## 环境排错
-
-实际遇到的问题和处理记录见 `docs/environment.md`。本项目使用 VS Code 完成实验，报告中如实记录开发工具。
+官方依据：[MyBatis 兼容表](https://mybatis.org/spring-boot-starter/mybatis-spring-boot-autoconfigure/)、[Vue 快速开始](https://vuejs.org/guide/quick-start.html)、[Node.js 下载](https://nodejs.org/en/download)。
