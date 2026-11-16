@@ -73,4 +73,9 @@ public class Medicine implements Serializable {
             ", unit = " + unit +
             "}";
     }
+
+    @TableField("stock")
+    private java.math.BigDecimal stock;
+    public java.math.BigDecimal getStock() { return stock; }
+    public void setStock(java.math.BigDecimal value) { this.stock=value; }
 }

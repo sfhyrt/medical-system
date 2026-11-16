@@ -14,5 +14,8 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface MedicineMapper extends BaseMapper<Medicine> {
+    @org.apache.ibatis.annotations.Update("UPDATE medicine SET stock=stock-#{quantity} WHERE id=#{id} AND stock>=#{quantity}")
+    int consume(@org.apache.ibatis.annotations.Param("id") long id,@org.apache.ibatis.annotations.Param("quantity") java.math.BigDecimal quantity);
+
 
 }

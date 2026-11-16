@@ -14,5 +14,10 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface RegistrationMapper extends BaseMapper<Registration> {
+    @org.apache.ibatis.annotations.Select("SELECT id FROM registration WHERE patient_id=#{patientId} AND schedule_id=#{scheduleId} AND status<>'CANCELLED' LIMIT 1 FOR UPDATE")
+    Long active(@org.apache.ibatis.annotations.Param("patientId") long patientId, @org.apache.ibatis.annotations.Param("scheduleId") long scheduleId);
+    @org.apache.ibatis.annotations.Select("SELECT * FROM registration WHERE id=#{id} FOR UPDATE")
+    Registration lock(@org.apache.ibatis.annotations.Param("id") long id);
+
 
 }

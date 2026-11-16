@@ -22,13 +22,24 @@ CREATE TABLE IF NOT EXISTS patient (
  CONSTRAINT ck_patient_phone CHECK(phone REGEXP '^1[3-9][0-9]{9}$'),
  CONSTRAINT ck_patient_identity CHECK(id_card REGEXP '^[1-9][0-9]{16}[0-9X]$')
 ) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS doctor_schedule (
+ id BIGINT NOT NULL AUTO_INCREMENT, doctor_id BIGINT NOT NULL, visit_date DATE NOT NULL,
+ session VARCHAR(2) NOT NULL, capacity INT NOT NULL, remaining INT NOT NULL, enabled INT NOT NULL DEFAULT 1,
+ PRIMARY KEY(id), UNIQUE KEY uk_schedule_doctor_session(doctor_id,visit_date,session), KEY idx_schedule_date(visit_date,enabled),
+ CONSTRAINT fk_schedule_doctor FOREIGN KEY(doctor_id) REFERENCES doctor(id) ON DELETE RESTRICT,
+ CONSTRAINT ck_schedule_session CHECK(session IN ('AM','PM')),
+ CONSTRAINT ck_schedule_quota CHECK(capacity>0 AND remaining>=0 AND remaining<=capacity),
+ CONSTRAINT ck_schedule_enabled CHECK(enabled IN (0,1))
+) ENGINE=InnoDB;
 CREATE TABLE IF NOT EXISTS registration (
  id BIGINT NOT NULL AUTO_INCREMENT, registration_no VARCHAR(40) NOT NULL, patient_id BIGINT NOT NULL,
- doctor_id BIGINT NOT NULL, visit_time DATETIME NOT NULL, status VARCHAR(16) NOT NULL DEFAULT 'BOOKED',
+ doctor_id BIGINT NOT NULL, schedule_id BIGINT NULL, active_patient_id BIGINT GENERATED ALWAYS AS (CASE WHEN status <> 'CANCELLED' THEN patient_id ELSE NULL END) STORED, visit_time DATETIME NOT NULL, status VARCHAR(16) NOT NULL DEFAULT 'BOOKED',
  PRIMARY KEY(id), UNIQUE KEY uk_registration_no(registration_no),
  KEY idx_registration_patient_time(patient_id,visit_time), KEY idx_registration_doctor_time(doctor_id,visit_time),
  CONSTRAINT fk_registration_patient FOREIGN KEY(patient_id) REFERENCES patient(id) ON DELETE RESTRICT,
  CONSTRAINT fk_registration_doctor FOREIGN KEY(doctor_id) REFERENCES doctor(id) ON DELETE RESTRICT,
+ CONSTRAINT fk_registration_schedule FOREIGN KEY(schedule_id) REFERENCES doctor_schedule(id) ON DELETE RESTRICT,
+ CONSTRAINT uk_registration_active UNIQUE(active_patient_id,schedule_id),
  CONSTRAINT ck_registration_status CHECK(status IN ('BOOKED','COMPLETED','CANCELLED'))
 ) ENGINE=InnoDB;
 CREATE TABLE IF NOT EXISTS prescription (
@@ -38,7 +49,8 @@ CREATE TABLE IF NOT EXISTS prescription (
  CONSTRAINT fk_prescription_registration FOREIGN KEY(registration_id) REFERENCES registration(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 CREATE TABLE IF NOT EXISTS medicine (
- id BIGINT NOT NULL AUTO_INCREMENT, code VARCHAR(32) NOT NULL, name VARCHAR(100) NOT NULL, unit VARCHAR(20) NOT NULL,
+ id BIGINT NOT NULL AUTO_INCREMENT, code VARCHAR(32) NOT NULL, name VARCHAR(100) NOT NULL, unit VARCHAR(20) NOT NULL, stock DECIMAL(12,2) NOT NULL DEFAULT 0,
+ CONSTRAINT ck_medicine_stock CHECK(stock>=0),
  PRIMARY KEY(id), UNIQUE KEY uk_medicine_code(code)
 ) ENGINE=InnoDB;
 CREATE TABLE IF NOT EXISTS prescription_item (

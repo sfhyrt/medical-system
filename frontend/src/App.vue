@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import SystemStatus from './components/SystemStatus.vue'
+import CareWorkflow from './components/CareWorkflow.vue'
 import { api } from './api'
 
 const configs = {
@@ -18,6 +19,7 @@ const configs = {
     { key: 'phone', label: '联系电话', required: true }, { key: 'address', label: '联系地址', area: true },
   ], filters: ['name', 'phone', 'idCard'] },
 }
+const workflows = {schedules:'医生排班',registrations:'预约挂号',prescriptions:'处方管理',medicines:'药品库存'}
 const active = ref('departments')
 const config = computed(() => configs[active.value])
 const rows = ref([]), total = ref(0), page = ref(1), pageSize = ref(5), pages = ref(0)
@@ -34,7 +36,7 @@ async function refreshCounts() {
   options.value = await api('/departments/options')
 }
 async function load() {
-  if (active.value === 'status') return
+  if (!configs[active.value]) return
   const id = ++requestId
   loading.value = true; error.value = ''
   const query = new URLSearchParams({page: page.value, pageSize: pageSize.value})
@@ -49,7 +51,7 @@ async function load() {
 function navigate(key) {
   requestId++; active.value = key; page.value = 1
   Object.keys(filters).forEach(k => delete filters[k]); rows.value = []; error.value = ''; notice.value = ''
-  if (key !== 'status') load()
+  if (configs[key]) load()
 }
 function reset() { Object.keys(filters).forEach(k => delete filters[k]); page.value = 1; load() }
 function fieldLabel(key) { return config.value.fields.find(f => f.key === key)?.label || key }
@@ -97,12 +99,12 @@ onMounted(async () => {
     <aside class="directory-sidebar">
       <a class="directory-brand" href="/" aria-label="医疗系统首页"><span class="directory-logo">+</span><span>医疗系统<small>MEDICAL SYSTEM</small></span></a>
       <p class="nav-caption">工作空间</p>
-      <nav aria-label="主导航"><button v-for="(item,key) in configs" :key="key" :class="{selected:active===key}" @click="navigate(key)"><span class="nav-symbol">{{key==='departments'?'▦':key==='doctors'?'✚':'◎'}}</span>{{item.label}}<span class="nav-count">{{counts[key]}}</span></button><button :class="{selected:active==='status'}" @click="navigate('status')"><span class="nav-symbol">◉</span>服务状态</button></nav>
+      <nav aria-label="主导航"><button v-for="(item,key) in configs" :key="key" :class="{selected:active===key}" @click="navigate(key)"><span class="nav-symbol">{{key==='departments'?'▦':key==='doctors'?'✚':'◎'}}</span>{{item.label}}<span class="nav-count">{{counts[key]}}</span></button><button v-for="(label,key) in workflows" :key="key" :class="{selected:active===key}" @click="navigate(key)"><span class="nav-symbol">{{key==='schedules'?'▤':key==='registrations'?'◷':key==='prescriptions'?'▧':'◈'}}</span>{{label}}</button><button :class="{selected:active==='status'}" @click="navigate('status')"><span class="nav-symbol">◉</span>服务状态</button></nav>
       <div class="sidebar-note"><span class="sidebar-dot"></span>本地工作区<small>数据与服务运行在本机</small></div>
     </aside>
     <main class="workspace-main">
-      <header class="directory-topbar"><span>医疗信息管理<span class="breadcrumb"> / {{config?.label || '服务状态'}}</span></span><span class="connection-label" :class="{online:connected}"><i></i>{{connected?'数据服务已连接':'正在检查服务'}}</span></header>
-      <div v-if="active!=='status'" class="directory-content">
+      <header class="directory-topbar"><span>医疗信息管理<span class="breadcrumb"> / {{config?.label || workflows[active] || '服务状态'}}</span></span><span class="connection-label" :class="{online:connected}"><i></i>{{connected?'数据服务已连接':'正在检查服务'}}</span></header>
+      <div v-if="config" class="directory-content">
         <section class="directory-heading"><div><p class="directory-eyebrow">MEDICAL DIRECTORY</p><h1>{{config.label}}</h1><p>{{config.subtitle}}</p></div><button class="primary-action" @click="openForm(null)"><span>+</span>新增{{config.singular}}</button></section>
         <div v-if="notice" class="notice-banner" role="status">✓ {{notice}}</div>
         <div v-if="error" class="error-banner" role="alert">{{error}} <button @click="load">重新加载</button></div>
@@ -113,7 +115,7 @@ onMounted(async () => {
           <div class="pagination"><span>第 {{page}} 页 · 共 {{pages || 1}} 页</span><div><label for="page-size">每页</label><select id="page-size" v-model.number="pageSize" @change="page=1;load()"><option :value="5">5 条</option><option :value="10">10 条</option><option :value="20">20 条</option></select><button :disabled="page<=1||loading" @click="page--;load()" aria-label="上一页">‹</button><span class="current-page">{{page}}</span><button :disabled="page>=pages||loading" @click="page++;load()" aria-label="下一页">›</button></div></div>
         </section><p class="directory-footer">Medical System<span>信息维护 · 数据一致性 · 清晰可追溯</span></p>
       </div>
-      <section v-else class="status-content"><SystemStatus /></section>
+      <CareWorkflow v-else-if="workflows[active]" :key="active" :view="active" /><section v-else class="status-content"><SystemStatus /></section>
     </main>
     <dialog ref="formDialog" class="record-dialog" aria-labelledby="record-title"><form @submit.prevent="save" novalidate><div class="dialog-heading"><div><p>信息维护</p><h2 id="record-title">{{editingId?'编辑':'新增'}}{{config?.singular}}</h2></div><button type="button" class="dialog-close" @click="formDialog.close()" :disabled="saving" aria-label="关闭">×</button></div><div class="dialog-fields"><div v-for="field in config?.fields" :key="field.key" class="record-field" :class="{wide:field.area}"><label :for="'form-'+field.key">{{field.label}} <span v-if="field.required">*</span></label><select v-if="field.options" :id="'form-'+field.key" v-model="form[field.key]"><option value="">请选择</option><option v-for="option in selectOptions(field.key)" :key="option.value" :value="option.value">{{option.label}}</option></select><textarea v-else-if="field.area" :id="'form-'+field.key" v-model="form[field.key]" rows="3" maxlength="500"/><input v-else :id="'form-'+field.key" v-model="form[field.key]" :placeholder="field.placeholder || '请输入'+field.label" :maxlength="field.key==='idCard'?18:field.key==='phone'?11:120" autocomplete="off"/></div></div><p v-if="active==='patients'" class="field-hint">身份证将核验18位格式、出生日期和校验码。</p><div v-if="formError" class="dialog-error" role="alert">{{formError}}</div><div class="dialog-footer"><button type="button" class="secondary-action" @click="formDialog.close()" :disabled="saving">取消</button><button type="submit" class="primary-action" :disabled="saving">{{saving?'保存中…':'保存信息'}}</button></div></form></dialog>
     <dialog ref="deleteDialog" class="record-dialog delete-dialog" aria-labelledby="delete-title"><h2 id="delete-title">删除{{config?.singular}}</h2><p>确认删除“{{deleting?.name}}”？已被其他数据引用的记录将受到保护。</p><div v-if="formError" class="dialog-error" role="alert">{{formError}}</div><div class="dialog-footer"><button class="secondary-action" @click="deleteDialog.close()" :disabled="saving">取消</button><button class="danger-action" @click="confirmDelete" :disabled="saving">确认删除</button></div></dialog>

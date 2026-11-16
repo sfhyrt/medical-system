@@ -1,6 +1,6 @@
 # Medical System
 
-基于 Vue 3、Spring Boot、MyBatis 和 MySQL 的医疗系统基础工程，提供科室、医生、患者信息维护，以及服务状态与数据库运行信息查询。
+基于 Vue 3、Spring Boot、MyBatis 和 MySQL 的医疗信息管理系统，支持基础资料、医生排班、预约挂号、电子处方与药品库存联动。
 
 ## 当前功能
 
@@ -9,13 +9,17 @@
 - 手机号格式、身份证出生日期及校验码验证，重复信息和关联删除保护。
 - 患者列表中的证件号和联系方式脱敏展示，编辑页按需读取完整资料。
 
+- 医生排班：日期、上午/下午时段、接诊容量和开放状态，调整容量保留已占用号源。
+- 预约挂号：重复预约拦截、号源原子扣减、取消归还和取消后重新预约。
+- 电子处方：关联待就诊预约，校验多药品库存，事务性保存处方和明细、扣减库存并完成就诊。
+- 并发保护：排班及预约行锁、库存条件更新、数据库唯一键与非负约束。
 - 服务状态面板：查看后端接口、数据库连接和 Java 运行环境。
 - 数据库状态查询：通过 MyBatis 获取 MySQL 版本、服务器时间和查询验证结果。
 - 手动刷新：重新检测服务状态，失败时清除过期结果并显示错误提示。
 - 响应式页面：支持桌面与移动端查看。
 - 一体化运行：Vue 构建产物包含在可执行 JAR 中，也支持前后端分别开发。
 
-当前版本覆盖基础资料维护；挂号及处方已有关系表结构，业务流程、登录及授权模块尚未实现。服务默认仅监听127.0.0.1，供本地开发和验证使用。
+当前版本覆盖基础资料及排班、预约、处方流程；登录、角色授权、支付及真实诊疗对接尚未实现。服务默认仅监听127.0.0.1，供本地开发和验证使用。
 
 ## 技术栈
 
@@ -46,7 +50,13 @@ Copy-Item application-local.properties.example application-local.properties
 
 该命令执行sql/schema.sql，包含CREATE DATABASE IF NOT EXISTS与CREATE TABLE IF NOT EXISTS。它保留已有数据，也不会替代结构迁移工具升级旧表。
 
-按需在MySQL客户端执行sql/sample-data.sql加载合成开发数据；脚本中的姓名、证件、联系方式及诊疗内容均为合成内容。然后构建并启动：
+旧版本数据库升级使用以下命令；新数据库执行后可统一登记迁移版本。可选的-SampleData加载模拟药品和次日排班，不会重置已有库存和号源：
+
+```powershell
+.\scripts\migrate-database.ps1 -SampleData
+```
+
+首次演示先在MySQL客户端执行sql/sample-data.sql加载基础合成数据，再执行上面的命令加载排班；脚本中的姓名、证件、联系方式及诊疗内容均为合成内容。然后构建并启动：
 
 ```powershell
 .\scripts\build-demo.ps1
@@ -96,7 +106,7 @@ JAR 运行时不需要 Node.js。单独分发 JAR 时，在启动目录提供本
 .\scripts\generate-persistence.ps1 -Verify
 ```
 
-生成器根据七张表创建实体、BaseMapper接口和XML映射。默认不覆盖已有源码；-Verify将全套21个文件生成到target/generated-persistence，便于复核生成结果。生成器为独立Maven工具模块，不进入应用JAR。
+生成器根据八张业务表创建实体、BaseMapper接口和XML映射。默认不覆盖已有源码；-Verify将全套24个文件生成到target/generated-persistence，便于复核生成结果。数据库计算列active_patient_id由数据库维护，不生成写入字段。生成器为独立Maven工具模块，不进入应用JAR。
 
 ## 接口
 
@@ -111,10 +121,17 @@ JAR 运行时不需要 Node.js。单独分发 JAR 时，在启动目录提供本
 
 构建脚本执行 npm ci、npm run build、mvn clean verify，并检查 JAR 内是否包含 Vue 页面。仅执行后端测试时使用 mvn test。
 
-现有14项JUnit测试覆盖接口响应、异常分支、手机号与身份证边界、MyBatis参数绑定。运行真实数据库HTTP回归：
+默认14项JUnit测试覆盖接口响应、异常分支、手机号与身份证边界、MyBatis参数绑定。另有12项真实MySQL事务与并发测试，需显式启用：
+
+```powershell
+mvn.cmd test -Dtransaction.check=true
+```
+
+测试在当前配置数据库创建随机标识的合成记录并清理自身记录，校验号源与库存扣减后的异常回滚、取消/开方竞争、最后号源争抢及重复预约。配置数据库需先完成迁移；测试不会替换数据源为内存数据库。完整业务接口另见[工作流与事务](docs/workflows.md)。运行真实数据库HTTP回归：
 
 ```powershell
 python scripts/http-regression.py
+python scripts/workflow-regression.py
 ```
 
 脚本通过40项检查验证CRUD、组合分页、唯一约束、关联删除和注入载荷处理；仅清理本次创建的合成记录。首次运行前应加载sample-data.sql，其中的DOC001关联记录用于验证删除保护。

@@ -27,3 +27,7 @@ main 保存通过构建与验证的版本，develop 用于功能迭代。功能�
 
 
 首次运行先初始化sql/schema.sql，详见README。代码生成器位于tools/codegen。所有开发数据均须为合成数据。
+
+## 诊疗业务迭代
+
+旧数据库先执行scripts/migrate-database.ps1，再构建应用。新增工作流不替换基础资料CRUD，接口见api.md，事务与时序见workflows.md。库存与号源由服务事务管理，禁止在页面直接修改计数。

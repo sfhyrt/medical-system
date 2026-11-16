@@ -32,11 +32,11 @@ public class PersistenceGenerator {
   FastAutoGenerator.create(url,user,pass)
     .globalConfig(b->b.author("Medical System").disableOpenDir().outputDir(output.resolve("src/main/java").toString()))
     .packageConfig(b->b.parent("com.example.medical").pathInfo(Map.of(OutputFile.xml,output.resolve("src/main/resources/mapper").toString())))
-    .strategyConfig(b->{b.addInclude("department","doctor","patient","registration","prescription","medicine","prescription_item");
-       b.entityBuilder().idType(IdType.AUTO).enableTableFieldAnnotation();
+    .strategyConfig(b->{b.addInclude("department","doctor","patient","doctor_schedule","registration","prescription","medicine","prescription_item");
+       b.entityBuilder().idType(IdType.AUTO).enableTableFieldAnnotation().addIgnoreColumns("active_patient_id");
        b.mapperBuilder().enableMapperAnnotation().enableBaseResultMap().enableBaseColumnList();
        b.serviceBuilder().disable();b.controllerBuilder().disable();})
     .templateEngine(new FreemarkerTemplateEngine()).execute();
-  System.out.println("Generated entities, mappers and XML mappings from seven tables. Existing source files are preserved.");
+  System.out.println("Generated entities, mappers and XML mappings from eight tables. Existing source files are preserved. Computed duplicate-booking guard is database-managed.");
  }
 }

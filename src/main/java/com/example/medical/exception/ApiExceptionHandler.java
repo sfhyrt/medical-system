@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 public class ApiExceptionHandler {
  public record ApiError(String code,String message){}
  private ResponseEntity<ApiError> error(HttpStatus status,String code,String message){return ResponseEntity.status(status).body(new ApiError(code,message));}
+ @ExceptionHandler(BusinessException.class) public ResponseEntity<ApiError> business(BusinessException e){return error(HttpStatus.CONFLICT,e.getCode(),e.getMessage());}
+ @ExceptionHandler(RuntimeException.class) public ResponseEntity<ApiError> unexpected(RuntimeException e){org.slf4j.LoggerFactory.getLogger(ApiExceptionHandler.class).error("Request failed",e);return error(HttpStatus.INTERNAL_SERVER_ERROR,"INTERNAL_ERROR","操作未完成，请稍后重试");}
  @ExceptionHandler(ResourceNotFoundException.class) public ResponseEntity<ApiError> missing(ResourceNotFoundException e){return error(HttpStatus.NOT_FOUND,"NOT_FOUND",e.getMessage());}
  @ExceptionHandler(InvalidReferenceException.class) public ResponseEntity<ApiError> reference(InvalidReferenceException e){return error(HttpStatus.BAD_REQUEST,"INVALID_REFERENCE",e.getMessage());}
  @ExceptionHandler(MethodArgumentNotValidException.class) public ResponseEntity<ApiError> fields(MethodArgumentNotValidException e){

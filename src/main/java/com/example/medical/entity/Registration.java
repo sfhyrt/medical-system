@@ -98,4 +98,9 @@ public class Registration implements Serializable {
             ", status = " + status +
             "}";
     }
+
+    @TableField("schedule_id")
+    private Long scheduleId;
+    public Long getScheduleId() { return scheduleId; }
+    public void setScheduleId(Long value) { this.scheduleId=value; }
 }
