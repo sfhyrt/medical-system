@@ -9,7 +9,7 @@
 | Node.js / npm | 26.13.0 / 11.20.0 | node -v、npm.cmd -v |
 | MySQL | 8.0.44 | 连接数据库后查询版本 |
 | Spring Boot | 4.1.2 | pom.xml |
-| MyBatis Starter | 4.0.1 | pom.xml |
+| MyBatis-Plus | 3.5.18，Boot 4 Starter | pom.xml |
 | Vue / Vite | 3.5.45 / 8.3.8 | frontend/package.json |
 
 VS Code 可使用 Java、Spring Boot 和 Vue Official 扩展。编辑器推荐清单位于 .vscode/extensions.json。
@@ -18,7 +18,7 @@ VS Code 可使用 Java、Spring Boot 和 Vue Official 扩展。编辑器推荐�
 
 - 后端默认监听8080，Vite开发服务监听5173。
 - Vite 将 /api 代理到 http://127.0.0.1:8080。
-- MySQL 默认使用127.0.0.1:3306。
+- MySQL 默认使用127.0.0.1:3306/medical_system。
 - MyBatis 只读查询数据库版本、服务器时间及常量1，不修改业务数据。
 - 数据库凭据保存在项目根目录的 application-local.properties，或通过环境变量提供。
 

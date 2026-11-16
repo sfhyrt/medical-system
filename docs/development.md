@@ -2,7 +2,7 @@
 
 ## 项目结构
 
-前端采用 Vue 单文件组件，后端按 Controller、Service、Mapper 和 DTO 分层。数据库状态查询集中在 DatabaseProbeMapper，接口响应由 EnvironmentReport 定义。业务实体可在 entity 包中扩展。
+前端采用 Vue 单文件组件，后端按 Controller、Service、Mapper 和 DTO 分层。资料管理使用DirectoryService及MyBatis-Plus BaseMapper，统一校验和异常处理位于validation、exception包。数据库状态查询由DatabaseProbeMapper保留提供。
 
 ## 分支与提交
 
@@ -24,3 +24,6 @@ main 保存通过构建与验证的版本，develop 用于功能迭代。功能�
 后端自动化测试覆盖接口成功响应、404、405、数据库故障与无效查询结果。集成验证时，确认浏览器显示的版本和时间来自实际数据库，再检查错误提示和重新检测是否正常。
 
 数据库密码通过环境变量或本机私有配置提供。配置示例、源码和公开文档不包含实际凭据。排错方法见 environment.md。
+
+
+首次运行先初始化sql/schema.sql，详见README。代码生成器位于tools/codegen。所有开发数据均须为合成数据。
