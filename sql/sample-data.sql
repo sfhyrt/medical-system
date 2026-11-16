@@ -1,0 +1,27 @@
+-- Optional, synthetic development data. No real patient information.
+USE medical_system;
+INSERT IGNORE INTO department(code,name,location,phone,description) VALUES('CARDIO','心血管内科','门诊楼 2F · A区','13900002001','提供心血管内科相关诊疗服务');
+INSERT IGNORE INTO department(code,name,location,phone,description) VALUES('NEURO','神经内科','门诊楼 3F · A区','13900002002','提供神经内科相关诊疗服务');
+INSERT IGNORE INTO department(code,name,location,phone,description) VALUES('PEDIATRICS','儿科','门诊楼 1F · B区','13900002003','提供儿科相关诊疗服务');
+INSERT IGNORE INTO department(code,name,location,phone,description) VALUES('ORTHO','骨科','门诊楼 3F · B区','13900002004','提供骨科相关诊疗服务');
+INSERT IGNORE INTO department(code,name,location,phone,description) VALUES('DERMA','皮肤科','门诊楼 2F · B区','13900002005','提供皮肤科相关诊疗服务');
+INSERT IGNORE INTO department(code,name,location,phone,description) VALUES('GENERAL','全科医学科','门诊楼 1F · A区','13900002006','提供全科医学科相关诊疗服务');
+INSERT IGNORE INTO doctor(code,name,department_id,title,phone,status) SELECT 'DOC001','陈知远',id,'主任医师','13800003001',1 FROM department WHERE code='CARDIO';
+INSERT IGNORE INTO doctor(code,name,department_id,title,phone,status) SELECT 'DOC002','林若宁',id,'主治医师','13800003002',1 FROM department WHERE code='NEURO';
+INSERT IGNORE INTO doctor(code,name,department_id,title,phone,status) SELECT 'DOC003','周予安',id,'主任医师','13800003003',1 FROM department WHERE code='PEDIATRICS';
+INSERT IGNORE INTO doctor(code,name,department_id,title,phone,status) SELECT 'DOC004','沈清和',id,'主治医师','13800003004',1 FROM department WHERE code='ORTHO';
+INSERT IGNORE INTO doctor(code,name,department_id,title,phone,status) SELECT 'DOC005','宋明川',id,'主任医师','13800003005',1 FROM department WHERE code='DERMA';
+INSERT IGNORE INTO doctor(code,name,department_id,title,phone,status) SELECT 'DOC006','许知行',id,'主治医师','13800003006',1 FROM department WHERE code='GENERAL';
+INSERT IGNORE INTO doctor(code,name,department_id,title,phone,status) SELECT 'DOC007','顾云舟',id,'主任医师','13800003007',1 FROM department WHERE code='CARDIO';
+INSERT IGNORE INTO doctor(code,name,department_id,title,phone,status) SELECT 'DOC008','陆景辰',id,'主治医师','13800003008',1 FROM department WHERE code='NEURO';
+INSERT IGNORE INTO patient(name,id_card,phone,address) VALUES('林知夏','110101199001010015','13700004001','合成数据 · 本地开发地址1');
+INSERT IGNORE INTO patient(name,id_card,phone,address) VALUES('周景明','110101199101010020','13700004002','合成数据 · 本地开发地址2');
+INSERT IGNORE INTO patient(name,id_card,phone,address) VALUES('许安宁','110101199201010036','13700004003','合成数据 · 本地开发地址3');
+INSERT IGNORE INTO patient(name,id_card,phone,address) VALUES('苏语清','110101199301010041','13700004004','合成数据 · 本地开发地址4');
+INSERT IGNORE INTO patient(name,id_card,phone,address) VALUES('江亦辰','110101199401010057','13700004005','合成数据 · 本地开发地址5');
+INSERT IGNORE INTO patient(name,id_card,phone,address) VALUES('温以宁','110101199501010062','13700004006','合成数据 · 本地开发地址6');
+INSERT IGNORE INTO patient(name,id_card,phone,address) VALUES('贺书言','110101199601010078','13700004007','合成数据 · 本地开发地址7');
+INSERT IGNORE INTO medicine(code,name,unit) VALUES('MED001','开发示例药品A','盒');
+INSERT IGNORE INTO registration(registration_no,patient_id,doctor_id,visit_time,status) SELECT 'DEV-REG-001',p.id,d.id,'2026-11-16 09:00:00','COMPLETED' FROM patient p JOIN doctor d ON d.code='DOC001' WHERE p.id_card='110101199001010015';
+INSERT IGNORE INTO prescription(prescription_no,registration_id,diagnosis) SELECT 'DEV-RX-001',id,'合成诊疗记录，仅用于本地数据关系演示' FROM registration WHERE registration_no='DEV-REG-001';
+INSERT IGNORE INTO prescription_item(prescription_id,line_no,medicine_id,dosage,frequency,days,quantity) SELECT p.id,1,m.id,'遵医嘱','遵医嘱',1,1 FROM prescription p JOIN medicine m ON m.code='MED001' WHERE p.prescription_no='DEV-RX-001';
